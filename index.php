@@ -1,6 +1,5 @@
 <?php
 $tmdbKey = 'YOUR_KEY_HERE';
-
 ?>
 <style>
 fieldset{
@@ -70,45 +69,7 @@ $TMDB -> showAdultContent();
 //Debug;
 $TMDB -> saveDebug();
 
-
-
-//$TMDB -> makeAuthenticationToken();
-//echo $TMDB -> getAuthenticationTokenLink();
-//$TMDB -> setAuthenticationToken('5d6ac6a72bd09c6794aab287b1914e4d0053897f');
-//$TMDB -> makeAuthenticationSession();
-$TMDB -> setAuthenticationSessionId('72ceae866b79adbaef568b15c721bfdf65e845a8');//Meu user riboni;
-//$TMDB -> makeAuthenticationGuestSession();
-$accountObject = $TMDB -> logIn();
-//$accountObject = $TMDB -> getAccount();
-//$accountListsArray = $TMDB -> getAccountLists();
-//$accountListsArray = $TMDB -> setAccountFavoriteMovie(551, true);
-//$accountListsArray = $TMDB -> setAccountFavoriteMovie(551, false);
-//$accountListsArray = $TMDB -> getAccountFavoriteMovies();
-//$accountListsArray = $TMDB -> getAccountRatedMovies();
-//$accountListsArray = $TMDB -> setAccountMovieWatchlist(551, true);
-//$accountListsArray = $TMDB -> setAccountMovieWatchlist(551, false);
-//$accountListsArray = $TMDB -> getAccountMovieWatchlist();
-//$accountListsArray = $TMDB -> movieReviews(49026);
-//$accountListsArray = $TMDB -> movieLists(49026);
-//$accountListsArray = $TMDB -> movieChanges(49026, '2013-07-01', '2013-07-14');
-//$accountListsArray = $TMDB -> personChanges(62, '2013-07-01', '2013-07-14');
-//$accountListsArray = $TMDB -> movieAccountStates(49051);
-//$accountListsArray = $TMDB -> movieRating(551, 9.5);
-//$accountListsArray = $TMDB -> listDetail('51dec322760ee341b4249fb9');
-//$accountListsArray = $TMDB -> listItemStatus('51dec322760ee341b4249fb9', 1865);
-//$accountListsArray = $TMDB -> addList('Lista Teste3', 'TETE tete3');
-//$accountListsArray = $TMDB -> addListMedia('51df0375e24fab0e3ee62025', 551);
-//$accountListsArray = $TMDB -> removeListMedia('51df0375e24fab0e3ee62025', 551);
-//$accountListsArray = $TMDB -> removeList('51df0375e24fab0e3ee62025');
-
-
-echo "<pre>Print: ";Print_r( $accountListsArray );echo "</pre>";
-echo "<pre>Result: ";Print_r( $TMDB -> results() );echo "</pre>";
-
-$TMDB -> showDebug();
-
-
-die('<br>'.__FILE__.' '.__LINE__);
+//Examples;
 if( isset( $_GET['query'] ) ){
   $query = $_GET['query'];
 }else{

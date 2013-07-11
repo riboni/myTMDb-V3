@@ -72,6 +72,7 @@ class TMDB{
     include($defaultPath.'tmdbAccountStates.php');
     include($defaultPath.'tmdbCast.php');
     include($defaultPath.'tmdbChange.php');
+    include($defaultPath.'tmdbChangeId.php');
     include($defaultPath.'tmdbCollection.php');
     include($defaultPath.'tmdbCompany.php');
     include($defaultPath.'tmdbCountry.php');
@@ -80,6 +81,7 @@ class TMDB{
     include($defaultPath.'tmdbCrew.php');
     include($defaultPath.'tmdbGenre.php');
     include($defaultPath.'tmdbImage.php');
+    include($defaultPath.'tmdbJobs.php');
     include($defaultPath.'tmdbKeyword.php');
     include($defaultPath.'tmdbList.php');
     include($defaultPath.'tmdbMovie.php');
@@ -323,6 +325,12 @@ class TMDB{
             $object = new TMDBChange( $APIReturn['results'][ $k ] );
           }else if( $type == 'REVIEW' ){
             $object = new TMDBReview( $APIReturn['results'][ $k ] );
+          }else if( $type == 'CHANGE_ID_MOVIE' ){
+            $object = new TMDBChangeId($APIReturn['results'][ $k ], 'MOVIE');
+          }else if( $type == 'CHANGE_ID_PERSON' ){
+            $object = new TMDBChangeId($APIReturn['results'][ $k ], 'PERSON');
+          }else if( $type == 'JOBS' ){
+            $object = new TMDBJobs( $APIReturn['results'][ $k ] );
           }
           $objectList[] = $object;
         }
@@ -1285,7 +1293,7 @@ class TMDB{
   function listDetail($listId){
     $listBasicInfo = $this -> listInfo($listId);
     if( is_array( $listBasicInfo ) && sizeof( $listBasicInfo ) > 0 ){
-      $listObject = new TMDBList($listBasicInfo, true);
+      $listObject = new TMDBList($listBasicInfo);
       $listMovies = $this -> loadListMovies( $listBasicInfo['items'] );
       $listObject -> setItems( $listMovies );
       return $listObject;
@@ -1404,29 +1412,48 @@ class TMDB{
   }
 
   //Discover Methods;
-  function movieDiscover($page = false){
+  function movieDiscover($page = false, $sortBy = false, $year = false, $primaryReleaseYear = false, $voteCountGte = false, $voteAverageGte = false, $withGenres = false, $releaseDateGte = false, $releaseDateLte = false, $certificationCountry = false, $certificationLte = false, $withCompanies = false){
     $parameters = array();
+    //Make the query;
+    $parameters['query'] = $this -> parseQuery( $query );
     //Set the page;
-    if( $page !== false ){
-      $parameters['page'] = $page;
+    if( $sortBy !== false ){
+      $parameters['sort_by'] = $sortBy;
     }
-    ///3/discover/movie
-    
-//    page	Minimum value is 1, expected value is an integer.
-//language	ISO 639-1 code.
-//sort_by	Available options are vote_average.desc, vote_average.asc, release_date.desc, release_date.asc, popularity.desc, popularity.asc
-//include_adult	Toggle the inclusion of adult titles. Expected value is a boolean, true or false
-//year	Filter the results release dates to matches that include this value. Expected value is a year.
-//primary_release_year	Filter the results so that only the primary release date year has this value. Expected value is a year.
-//vote_count.gte	Only include movies that are equal to, or have a vote count higher than this value. Expected value is an integer.
-//vote_average.gte	Only include movies that are equal to, or have a higher average rating than this value. Expected value is a float.
-//with_genres	Only include movies with the specified genres. Expected value is an integer (the id of a genre). Multiple values can be specified. Comma separated indicates an 'AND' query, while a pipe (|) separated value indicates an 'OR'.
-//release_date.gte	The minimum release to include. Expected format is YYYY-MM-DD.
-//release_date.lte	The maximum release to include. Expected format is YYYY-MM-DD.
-//certification_country	Only include movies with certifications for a specific country. When this value is specified, 'certification.lte' is required. A ISO 3166-1 is expected.
-//certification.lte	Only include movies with this certification and lower. Expected value is a valid certification for the specificed 'certification_country'.
-//with_companies	Filter movies to include a specific company. Expected valu is an integer (the id of a company). They can be comma separated to indicate an 'AND' query.
-
+    if( $year !== false ){
+      $parameters['year'] = $year;
+    }
+    if( $primaryReleaseYear !== false ){
+      $parameters['primary_release_year'] = $primaryReleaseYear;
+    }
+    if( $voteCountGte !== false ){
+      $parameters['vote_count.gte'] = $voteCountGte;
+    }
+    if( $voteAverageGte !== false ){
+      $parameters['vote_average.gte'] = $voteAverageGte;
+    }
+    if( $withGenres !== false ){
+      $parameters['with_genres'] = $withGenres;
+    }
+    if( $releaseDateGte !== false ){
+      $parameters['release_date.gte'] = $releaseDateGte;
+    }
+    if( $releaseDateLte !== false ){
+      $parameters['release_date.lte'] = $releaseDateLte;
+    }
+    if( $certificationCountry !== false ){
+      $parameters['certification_country'] = $certificationCountry;
+    }
+    if( $certificationLte !== false ){
+      $parameters['certification.lte'] = $certificationLte;
+    }
+    if( $withCompanies !== false ){
+      $parameters['with_companies'] = $withCompanies;
+    }
+    //Call the API;
+    $APIReturn = $this -> callMethod('discover', 'movie', $parameters);
+    //Make the list return;
+    return $this -> _makeListReturn($APIReturn, 'MOVIE');
   }
 
   //TMDB Search Methods;
@@ -1515,22 +1542,69 @@ class TMDB{
   }
 
   //TMDB Reviews Methods;
-  function getReview($reviewId){
-    ///3/review/{id}
+  function reviewInfo($reviewId, $methodRaw = false, $parametersGet = false, $parametersPost = false){
+    return $this -> callObjectMethod('review', $reviewId, $methodRaw, $parametersGet, $parametersPost);
+  }
+
+  //Reviews Methods;
+  function reviewDetails($reviewId){
+    $reviewBasicInfo = $this -> reviewInfo($reviewId);
+    if( is_array( $reviewBasicInfo ) && sizeof( $reviewBasicInfo ) > 0 ){
+      $reviewObject = new TMDBReview($reviewBasicInfo, true);
+      return $reviewObject;
+    }else{
+      return false;
+    }
   }
 
   //TMDB Changes Methods;
-  function getAllMovieChanges(){
-    ///3/movie/changes
+  function getAllMovieChanges($page = false, $startDate = false, $endDate = false){
+    $parameters = array();
+    //Set the page;
+    if( $page !== false ){
+      $parameters['page'] = $page;
+    }
+    //Set the start date;
+    if( $startDate !== false ){
+      $parameters['start_date'] = $startDate;
+    }
+    //Set the end date;
+    if( $endDate !== false ){
+      $parameters['end_date'] = $endDate;
+    }
+    //Call the API;
+    $APIReturn = $this -> callMethod('movie', 'changes', $parameters);
+    //Make the list return;
+    return $this -> _makeListReturn($APIReturn, 'CHANGE_ID_MOVIE');
   }
 
-  function getAllPersonChanges(){
-    ///3/person/changes
+  function getAllPersonChanges($page = false, $startDate = false, $endDate = false){
+    $parameters = array();
+    //Set the page;
+    if( $page !== false ){
+      $parameters['page'] = $page;
+    }
+    //Set the start date;
+    if( $startDate !== false ){
+      $parameters['start_date'] = $startDate;
+    }
+    //Set the end date;
+    if( $endDate !== false ){
+      $parameters['end_date'] = $endDate;
+    }
+    //Call the API;
+    $APIReturn = $this -> callMethod('person', 'changes', $parameters);
+    //Make the list return;
+    return $this -> _makeListReturn($APIReturn, 'CHANGE_ID_PERSON');
   }
 
   //TMDB Jobs Methods;
-  function getValidJobs(){
-    ///3/job/list
+  function loadJobs(){
+    //Call the API;
+    $APIReturn = $this -> callMethod('job', 'list');
+    //Make the list return;
+    $APIReturn = $this ->  _makeArrayReturn( $APIReturn['jobs'] );
+    return $this -> _makeListReturn($APIReturn, 'JOBS');
   }
 
   //Load Methods;
@@ -1597,8 +1671,6 @@ class TMDB{
         $castObjects[$i] = $castObject;
       }
       ksort( $castObjects );
-
-
       $castArray = array();
       foreach($castObjects as $k => $v){
         $castObject = $castObjects[ $k ];
@@ -1623,7 +1695,6 @@ class TMDB{
         $crewObject    = new TMDBCrew( $crew[ $k ] );
         $crewObjects[] = $crewObject;
       }
-
       $crewArray = array();
       foreach($crewObjects as $k => $v){
         $crewObject = $crewObjects[ $k ];
