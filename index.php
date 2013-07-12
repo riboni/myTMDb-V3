@@ -1,5 +1,9 @@
 <?php
-$tmdbKey = 'YOUR_KEY_HERE';
+if( is_file('your.app.key.php') ){
+  include_once('your.app.key.php');
+}else{
+  $tmdbKey = 'YOUR_APP_KEY';
+}
 ?>
 <style>
 fieldset{
