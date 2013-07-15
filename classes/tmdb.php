@@ -7,20 +7,23 @@
 * @copyright 2012 Giuliano Riboni
 * @version 1.0.0
 * @date 2012-08-02
+* @version 1.1.0
+* @date 2013-06-13
 * @version 1.2.0
-* @date 2013-07-13
+* @date 2013-07-15
 * @API documentation http://docs.themoviedb.apiary.io/
 *
 */
 class TMDB{
   //Variables;
-  var $TMDBVersion                       = '1.2.0';
+  var $classVersion                      = '1.2.0';
+  var $classLastUpdate                   = '2013-07-15';
   var $TMDBUrl                           = 'http://api.themoviedb.org/3/';
-  var $TMDB_API_Version                  = 'v3';
-  var $defaultLanguage                   = 'en';
+  var $TMDBVersion                       = 'V3';
   var $TMDBAuthenticationTokenValidation = 'https://www.themoviedb.org/authenticate/';
   var $TMDBMovieUrl                      = 'http://www.themoviedb.org/movie/';
   var $IMDBMovieUrl                      = 'http://www.imdb.com/title/';
+  var $defaultLanguage                   = 'en';
   var $hideAdultContent                  = true;
   var $requestCurrentAttempt             = 0;
   var $requestMaxAttempt                 = 10;
@@ -57,41 +60,10 @@ class TMDB{
 
   //Constructor;
   function TMDB($apikey) {
-    //Save the api key;
     $this -> setApikey( $apikey );
-    //Set the default language;
     $this -> setLanguage( $this -> defaultLanguage );
-    //Make the basic configuration;
     $this -> makeConfiguration();
     $this -> loadClasses();
-  }
-
-  function loadClasses(){
-    $defaultPath = str_replace('tmdb.php', '', __FILE__);
-    include($defaultPath.'tmdbAccount.php');
-    include($defaultPath.'tmdbAccountStates.php');
-    include($defaultPath.'tmdbCast.php');
-    include($defaultPath.'tmdbChange.php');
-    include($defaultPath.'tmdbChangeId.php');
-    include($defaultPath.'tmdbCollection.php');
-    include($defaultPath.'tmdbCompany.php');
-    include($defaultPath.'tmdbCountry.php');
-    include($defaultPath.'tmdbCreditCast.php');
-    include($defaultPath.'tmdbCreditCrew.php');
-    include($defaultPath.'tmdbCrew.php');
-    include($defaultPath.'tmdbGenre.php');
-    include($defaultPath.'tmdbImage.php');
-    include($defaultPath.'tmdbJobs.php');
-    include($defaultPath.'tmdbKeyword.php');
-    include($defaultPath.'tmdbList.php');
-    include($defaultPath.'tmdbMovie.php');
-    include($defaultPath.'tmdbPerson.php');
-    include($defaultPath.'tmdbReleaseInfo.php');
-    include($defaultPath.'tmdbReview.php');
-    include($defaultPath.'tmdbSpokenLanguage.php');
-    include($defaultPath.'tmdbTitle.php');
-    include($defaultPath.'tmdbTrailer.php');
-    include($defaultPath.'tmdbTranslation.php');
   }
 
   //Debug Methods;
@@ -153,6 +125,46 @@ class TMDB{
   }
 
   //Basic Class Methods;
+  function loadClasses(){
+    $defaultPath = str_replace('tmdb.php', '', __FILE__);
+    include($defaultPath.'tmdbAccount.php');
+    include($defaultPath.'tmdbAccountStates.php');
+    include($defaultPath.'tmdbCast.php');
+    include($defaultPath.'tmdbChange.php');
+    include($defaultPath.'tmdbChangeId.php');
+    include($defaultPath.'tmdbCollection.php');
+    include($defaultPath.'tmdbCompany.php');
+    include($defaultPath.'tmdbCountry.php');
+    include($defaultPath.'tmdbCreditCast.php');
+    include($defaultPath.'tmdbCreditCrew.php');
+    include($defaultPath.'tmdbCrew.php');
+    include($defaultPath.'tmdbGenre.php');
+    include($defaultPath.'tmdbImage.php');
+    include($defaultPath.'tmdbJobs.php');
+    include($defaultPath.'tmdbKeyword.php');
+    include($defaultPath.'tmdbList.php');
+    include($defaultPath.'tmdbMovie.php');
+    include($defaultPath.'tmdbPerson.php');
+    include($defaultPath.'tmdbReleaseInfo.php');
+    include($defaultPath.'tmdbReview.php');
+    include($defaultPath.'tmdbSpokenLanguage.php');
+    include($defaultPath.'tmdbTitle.php');
+    include($defaultPath.'tmdbTrailer.php');
+    include($defaultPath.'tmdbTranslation.php');
+  }
+
+  function getVersion(){
+    return $this -> classVersion;
+  }
+
+  function getLastUpdate(){
+    return $this -> classLastUpdate;
+  }
+
+  function getTMDBVersion(){
+    return $this -> TMDBVersion;
+  }
+
   function getLastResult(){
     return $this -> lastResult;
   }
@@ -335,11 +347,13 @@ class TMDB{
           $objectList[] = $object;
         }
       }
-      $this -> results = $objectList;
+      $this -> results       = $objectList;
+      $this -> resultsStatus = true;
       return true;
     }else{
-      $this -> totalResults = 0;
-      $this -> results      = false;
+      $this -> totalResults  = 0;
+      $this -> results       = false;
+      $this -> resultsStatus = false;
       return false;
     }
   }
@@ -528,7 +542,7 @@ class TMDB{
       if( $APIReturn['success'] == true ){
         $this -> authenticationSessionId        = $APIReturn['session_id'];
         $this -> authenticationSessionExpiresAt = false;
-        return $APIReturn['session_id'];
+        return $this -> authenticationSessionId;
       }else{
         $this -> authenticationSessionId        = false;
         $this -> authenticationSessionExpiresAt = false;
@@ -610,9 +624,14 @@ class TMDB{
 
   function getAccountFavoriteMovies($page = false, $sortBy = false, $sortOrder = false){
     $parameters = array();
-    //Set the page;
     if( $page !== false ){
       $parameters['page'] = $page;
+    }
+    if( $sortBy !== false ){
+      $parameters['sort_by'] = $sortBy;
+    }
+    if( $sortOrder !== false ){
+      $parameters['sort_order'] = $sortOrder;
     }
     $APIReturn = $this -> accountInfo(true, 'favorite_movies', $parameters);
     if( is_array( $APIReturn ) && sizeof( $APIReturn ) > 0 ){
@@ -636,9 +655,14 @@ class TMDB{
 
   function getAccountRatedMovies($page = false, $sortBy = false, $sortOrder = false){
     $parameters = array();
-    //Set the page;
     if( $page !== false ){
       $parameters['page'] = $page;
+    }
+    if( $sortBy !== false ){
+      $parameters['sort_by'] = $sortBy;
+    }
+    if( $sortOrder !== false ){
+      $parameters['sort_order'] = $sortOrder;
     }
     $APIReturn = $this -> accountInfo(true, 'rated_movies', $parameters);
     if( is_array( $APIReturn ) && sizeof( $APIReturn ) > 0 ){
@@ -650,9 +674,14 @@ class TMDB{
 
   function getAccountMovieWatchlist($page = false, $sortBy = false, $sortOrder = false){
     $parameters = array();
-    //Set the page;
     if( $page !== false ){
       $parameters['page'] = $page;
+    }
+    if( $sortBy !== false ){
+      $parameters['sort_by'] = $sortBy;
+    }
+    if( $sortOrder !== false ){
+      $parameters['sort_order'] = $sortOrder;
     }
     $APIReturn = $this -> accountInfo(true, 'movie_watchlist', $parameters);
     if( is_array( $APIReturn ) && sizeof( $APIReturn ) > 0 ){
@@ -1335,9 +1364,9 @@ class TMDB{
     return $this -> callObjectMethod('genre', $genreId, $methodRaw, $parameters);
   }
 
-  function genreList($parameters = false){
+  function genreList(){
     //Call the API;
-    $APIReturn = $this -> callMethod('genre', 'list', $parameters);
+    $APIReturn = $this -> callMethod('genre', 'list');
     //Save the current page;
     $this -> currentPage = 1;
     //Save the total page;
@@ -1416,7 +1445,6 @@ class TMDB{
     $parameters = array();
     //Make the query;
     $parameters['query'] = $this -> parseQuery( $query );
-    //Set the page;
     if( $sortBy !== false ){
       $parameters['sort_by'] = $sortBy;
     }
@@ -1542,8 +1570,8 @@ class TMDB{
   }
 
   //TMDB Reviews Methods;
-  function reviewInfo($reviewId, $methodRaw = false, $parametersGet = false, $parametersPost = false){
-    return $this -> callObjectMethod('review', $reviewId, $methodRaw, $parametersGet, $parametersPost);
+  function reviewInfo($reviewId, $methodRaw = false, $parameters = false){
+    return $this -> callObjectMethod('review', $reviewId, $methodRaw, $parameters);
   }
 
   //Reviews Methods;

@@ -1,9 +1,15 @@
 <?php
+if( is_file('your.app.key.php') ){
+  include_once('your.app.key.php');
+}else{
+  $tmdbKey = 'YOUR_APP_KEY';
+}
+
 //Load the classes;
 include("classes/tmdb.php");
 
 //Start whith the key;
-$TMDB = new TMDB('BOGUS_KEY');
+$TMDB = new TMDB($tmdbKey);
 
 //Set the language;
 $TMDB -> setLanguage('en');
@@ -17,7 +23,7 @@ $TMDB -> saveDebug();
 <!DOCTYPE html>
 <html lang='pt'>
 <head>
-  <TITLE>myTMDB V3</TITLE>
+  <TITLE>myTMDB V3 (Live demo)</TITLE>
   <META NAME='Author' CONTENT='Giuliano Riboni Osorio - http://giuliano.riboni.com.br'/>
   <META NAME='Version' CONTENT='<?php echo $TMDB -> getVersion(); ?>'/>
   <META NAME='Year' CONTENT='2013'/>
@@ -32,7 +38,6 @@ $TMDB -> saveDebug();
   <META NAME='viewport' CONTENT='width=device-width, height=device-height, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable = no'/>
   <META NAME='format-detection' CONTENT='telephone=no'/>
   <META NAME='apple-mobile-web-app-capable' CONTENT='no'/>
-  <LINK REL="SHORTCUT ICON" HREF="http://giuliano.riboni.com.br/templates/img/favicon.ico"/>
   <LINK HREF='_htmlContent/bootstrap/css/bootstrap.min.css?<?php echo $TMDB -> getVersion(); ?>' REL='stylesheet' TYPE='text/css' MEDIA='screen, projection'/>
   <LINK HREF='_htmlContent/bootstrap/css/bootstrap-responsive.min.css?<?php echo $TMDB -> getVersion(); ?>' REL='stylesheet' TYPE='text/css' MEDIA='screen, projection'/>
   <style>
@@ -80,7 +85,7 @@ $TMDB -> saveDebug();
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </a>
-      <a class="brand" href="http://tmdb.giulianoweb.com.br">myTMDB <?php echo $TMDB -> getTMDBVersion(); ?></a>
+      <a class="brand" href="http://tmdb.giulianoweb.com.br">myTMDB <?php echo $TMDB -> getTMDBVersion(); ?> (Live demo)</a>
       <div class="nav-collapse collapse">
         <ul class="nav" id="navTopBarMenu">
           <li><a href="#About">About</a></li>
@@ -132,14 +137,13 @@ $TMDB -> saveDebug();
         </ul>
       </div>
       <div class="span10">
-        <h2>myTMDB <?php echo $TMDB -> getTMDBVersion(); ?></h2>
+        <h2>myTMDB <?php echo $TMDB -> getTMDBVersion(); ?> (live demo)</h2>
         <section id="About">
           <h3>About</h3>
           <p>This is my PHP version of a wrapper to use with TheMovieDatabase API.</p>
           <p>Class Version: <?php echo $TMDB -> getVersion(); ?>.</p>
           <p>Last Update: <?php echo $TMDB -> getLastUpdate(); ?>.</p>
-          <p>Download: <a href="https://github.com/riboni/myTMDb-V3" target="_BLANK">https://github.com/riboni/myTMDb-V3</a>.</p>
-          <p>Author: <a href="http://giuliano.riboni.com.br" target="_BLANK">Giuliano Riboni</a> (http://giuliano.riboni.com.br).</p>
+          <p>Live Demo: <a href="live.php" target="_blank">Click Here</a>.</p>
         </section>
         <section id="HowToStart">
           <h3>How To Start</h3>
